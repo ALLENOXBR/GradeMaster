@@ -15,7 +15,8 @@
                         primary: '#FACC15',
                         accent: '#B45309',
                         darkBg: '#0F172A',
-                        darkCard: '#1E293B'
+                        darkCard: '#1E293B',
+                        success: '#22C55E'
                     }
                 }
             }
@@ -92,19 +93,44 @@
         }
 
         .current-row { background-color: rgba(250, 204, 21, 0.05) !important; }
+        
+        /* Estilo para a Coluna do Dia Atual */
         .current-day-col {
-            background-color: rgba(250, 204, 21, 0.05) !important;
-            border-left: 2px solid rgba(250, 204, 21, 0.3) !important;
-            border-right: 2px solid rgba(250, 204, 21, 0.3) !important;
+            background-color: rgba(34, 197, 94, 0.03) !important;
+            position: relative;
         }
+
+        /* Marcador Superior Verde */
+        .day-marker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: #22C55E;
+            display: none;
+            z-index: 10;
+        }
+        
+        .active-day .day-marker {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
+        }
+
         .active-cell {
-            background-color: rgba(250, 204, 21, 0.2) !important;
-            box-shadow: inset 0 0 15px rgba(250, 204, 21, 0.1);
+            background-color: rgba(34, 197, 94, 0.1) !important;
+            box-shadow: inset 0 0 15px rgba(34, 197, 94, 0.05);
         }
+
         .current-card {
-            border: 2px solid #FACC15 !important;
+            border: 2px solid #22C55E !important;
             transform: scale(1.02);
-            box-shadow: 0 10px 15px -3px rgba(250, 204, 21, 0.2);
+            box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.2);
         }
 
         @keyframes pulse-border {
@@ -133,7 +159,6 @@
                     <span class="font-extrabold text-sm sm:text-base tracking-tight hidden lg:inline">Grade<span class="text-amber-600 dark:text-yellow-500">Master</span></span>
                 </div>
                 
-                <!-- Monitor Digital Estilo Botão Premium -->
                 <div class="flex items-center bg-amber-500 px-3 py-1.5 rounded-xl shadow-md border-none">
                     <div class="flex items-center gap-2 border-r border-amber-600/30 pr-3 mr-3">
                         <span id="liveClock" class="font-black text-slate-900 text-xs sm:text-sm tracking-tighter">00:00:00</span>
@@ -240,12 +265,27 @@
                     <table class="w-full border-collapse">
                         <thead>
                             <tr class="bg-slate-100 dark:bg-slate-800 text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300">
-                                <th class="p-3 border-r border-slate-200 dark:border-slate-700 w-32">Horário</th>
-                                <th data-day-index="1" class="p-3 border-r border-slate-200 dark:border-slate-700">Segunda</th>
-                                <th data-day-index="2" class="p-3 border-r border-slate-200 dark:border-slate-700">Terça</th>
-                                <th data-day-index="3" class="p-3 border-r border-slate-200 dark:border-slate-700">Quarta</th>
-                                <th data-day-index="4" class="p-3 border-r border-slate-200 dark:border-slate-700">Quinta</th>
-                                <th data-day-index="5" class="p-3">Sexta</th>
+                                <th class="p-3 border-r border-slate-200 dark:border-slate-700 w-32 relative">Horário</th>
+                                <th data-day-index="1" class="p-3 border-r border-slate-200 dark:border-slate-700 relative">
+                                    <div class="day-marker"></div>
+                                    Segunda
+                                </th>
+                                <th data-day-index="2" class="p-3 border-r border-slate-200 dark:border-slate-700 relative">
+                                    <div class="day-marker"></div>
+                                    Terça
+                                </th>
+                                <th data-day-index="3" class="p-3 border-r border-slate-200 dark:border-slate-700 relative">
+                                    <div class="day-marker"></div>
+                                    Quarta
+                                </th>
+                                <th data-day-index="4" class="p-3 border-r border-slate-200 dark:border-slate-700 relative">
+                                    <div class="day-marker"></div>
+                                    Quinta
+                                </th>
+                                <th data-day-index="5" class="p-3 relative">
+                                    <div class="day-marker"></div>
+                                    Sexta
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="desktopBody"></tbody>
@@ -301,8 +341,8 @@
         }
 
         function calculateTimeline(startTime) {
-            const classDuration = 45; // Reajustado para 45 minutos
-            const breakDuration = 30;  // Reajustado para 30 minutos
+            const classDuration = 45; 
+            const breakDuration = 30;  
             let current = startTime;
             let timeline = [];
 
@@ -321,7 +361,8 @@
             const dayNum = now.getDate().toString().padStart(2, '0');
             const monthNum = (now.getMonth() + 1).toString().padStart(2, '0');
             const yearNum = now.getFullYear();
-            const weekDayIdx = now.getDay() === 0 ? 6 : now.getDay() - 1; 
+            const rawDay = now.getDay(); // 0-6
+            const weekDayIdx = rawDay === 0 ? 6 : rawDay - 1; 
             const weekDay = days[weekDayIdx] || 'Fim de Semana';
             
             const dateStr = `${dayNum}/${monthNum}/${yearNum} • ${weekDay}`;
@@ -331,7 +372,7 @@
             if(liveClock) liveClock.textContent = timeStr;
             if(liveDate) liveDate.textContent = dateStr;
 
-            const currentDay = now.getDay(); 
+            const currentDay = rawDay; 
             const currentMinutes = now.getHours() * 60 + now.getMinutes();
             const statusDot = document.getElementById('schoolStatus');
             
@@ -347,32 +388,44 @@
                 }
             });
 
+            // Limpeza de estados anteriores
             document.querySelectorAll('.current-row').forEach(el => el.classList.remove('current-row'));
             document.querySelectorAll('.current-day-col').forEach(el => el.classList.remove('current-day-col'));
             document.querySelectorAll('.active-cell').forEach(el => el.classList.remove('active-cell'));
             document.querySelectorAll('.current-card').forEach(el => el.classList.remove('current-card'));
+            document.querySelectorAll('.active-day').forEach(el => el.classList.remove('active-day'));
 
             const isSchoolDay = currentDay >= 1 && currentDay <= 5;
             
-            if (isSchoolDay && currentIdx !== -1) {
-                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-green-600 shadow-sm pulse';
-                
-                const row = document.querySelector(`[data-row-index="${currentIdx}"]`);
-                if(row) row.classList.add('current-row');
-                
-                const dayCols = document.querySelectorAll(`[data-day-index="${currentDay}"]`);
-                dayCols.forEach(col => col.classList.add('current-day-col'));
+            if (isSchoolDay) {
+                // Adiciona o marcador verde no topo da coluna (Desktop)
+                const header = document.querySelector(`th[data-day-index="${currentDay}"]`);
+                if(header) header.classList.add('active-day');
 
-                const activeCell = document.querySelector(`[data-cell-id="r${currentIdx}d${currentDay}"]`);
-                if(activeCell) activeCell.classList.add('active-cell');
+                // Adiciona o marcador no telemóvel (Mobile)
+                const mobileSec = document.getElementById(`mobile-day-sec-${currentDay}`);
+                if(mobileSec) mobileSec.classList.add('active-day');
 
-                const cards = document.querySelectorAll(`[data-card-day-index="${currentDay}"][data-card-row-index="${currentIdx}"]`);
-                cards.forEach(c => c.classList.add('current-card'));
-            } else {
-                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-red-600 shadow-sm';
-                if(isSchoolDay) {
+                if (currentIdx !== -1) {
+                    statusDot.className = 'w-2.5 h-2.5 rounded-full bg-green-600 shadow-sm pulse';
+                    
+                    const row = document.querySelector(`[data-row-index="${currentIdx}"]`);
+                    if(row) row.classList.add('current-row');
+                    
+                    const dayCols = document.querySelectorAll(`[data-day-index="${currentDay}"]`);
+                    dayCols.forEach(col => col.classList.add('current-day-col'));
+
+                    const activeCell = document.querySelector(`[data-cell-id="r${currentIdx}d${currentDay}"]`);
+                    if(activeCell) activeCell.classList.add('active-cell');
+
+                    const cards = document.querySelectorAll(`[data-card-day-index="${currentDay}"][data-card-row-index="${currentIdx}"]`);
+                    cards.forEach(c => c.classList.add('current-card'));
+                } else {
+                    statusDot.className = 'w-2.5 h-2.5 rounded-full bg-red-600 shadow-sm';
                     document.querySelectorAll(`[data-day-index="${currentDay}"]`).forEach(col => col.classList.add('current-day-col'));
                 }
+            } else {
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-red-600 shadow-sm';
             }
 
             updateProgressBar(currentMinutes, isSchoolDay);
@@ -380,8 +433,10 @@
 
         function updateProgressBar(nowMins, isSchoolDay) {
             if (globalTimeline.length === 0 || !isSchoolDay) {
-                 document.getElementById('progressBar').style.width = '0%';
-                 document.getElementById('progressPercentage').textContent = '0%';
+                 const progressBar = document.getElementById('progressBar');
+                 const progressPercentage = document.getElementById('progressPercentage');
+                 if(progressBar) progressBar.style.width = '0%';
+                 if(progressPercentage) progressPercentage.textContent = '0%';
                  return;
             }
 
@@ -501,7 +556,8 @@
             let mobileFinalHTML = '';
             mobileHTMLByDay.forEach(dayObj => {
                 mobileFinalHTML += `
-                    <section id="mobile-day-${dayObj.dayIdx}" class="max-w-md mx-auto w-full">
+                    <section id="mobile-day-sec-${dayObj.dayIdx}" class="max-w-md mx-auto w-full relative">
+                        <div class="day-marker !h-1 !top-[-8px]"></div>
                         <h3 class="flex items-center gap-3 mb-3">
                             <span class="px-3 py-1 bg-amber-600 text-white font-black uppercase tracking-widest text-[9px] rounded-lg shadow-md">${dayObj.day}</span>
                             <div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
